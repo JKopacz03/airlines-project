@@ -3,7 +3,6 @@ package org.airlines.airlinesproject.appuser;
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.registration.token.ConfirmationToken;
 import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,22 +14,22 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AppUserService implements UserDetailsService {
+public class ClientService implements UserDetailsService {
 
     private final static String USER_NOT_FOUND_MSG = "User with email %s not found";
-    private final AppUserRepository appUserRepository;
+    private final ClientRepository clientRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return appUserRepository.findByEmail(email)
+        return clientRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public String signUpUser(AppUser appUser){
-        final boolean userExists = appUserRepository
-                .findByEmail(appUser.getEmail())
+    public String signUpUser(Client client){
+        final boolean userExists = clientRepository
+                .findByEmail(client.getEmail())
                 .isPresent();
 
         if(userExists){
@@ -39,10 +38,10 @@ public class AppUserService implements UserDetailsService {
 
 
 
-        final String encodedPassword = bCryptPasswordEncoder.encode(appUser.getPassword());
-        appUser.setPassword(encodedPassword);
+        final String encodedPassword = bCryptPasswordEncoder.encode(client.getPassword());
+        client.setPassword(encodedPassword);
 
-        appUserRepository.save(appUser);
+        clientRepository.save(client);
 
         final String token = UUID.randomUUID().toString();
 
@@ -53,7 +52,7 @@ public class AppUserService implements UserDetailsService {
                 token,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMinutes(15),
-                appUser
+                client
         );
 
         confirmationTokenService.saveConfirmationToken(confirmationToken);
@@ -64,6 +63,6 @@ public class AppUserService implements UserDetailsService {
     }
 
     public int enableAppUser(String email) {
-        return appUserRepository.enableAppUser(email);
+        return clientRepository.enableAppUser(email);
     }
 }

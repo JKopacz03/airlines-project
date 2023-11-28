@@ -1,9 +1,9 @@
 package org.airlines.airlinesproject.registration;
 
 import lombok.AllArgsConstructor;
-import org.airlines.airlinesproject.appuser.AppUser;
+import org.airlines.airlinesproject.appuser.Client;
 import org.airlines.airlinesproject.appuser.AppUserRole;
-import org.airlines.airlinesproject.appuser.AppUserService;
+import org.airlines.airlinesproject.appuser.ClientService;
 import org.airlines.airlinesproject.email.EmailSender;
 import org.airlines.airlinesproject.registration.token.ConfirmationToken;
 import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RegistrationService {
 
-    private final AppUserService appUserService;
+    private final ClientService clientService;
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
@@ -27,8 +27,8 @@ public class RegistrationService {
         if(!isValidEmail){
             throw new IllegalStateException("email not valid: " + request.getEmail());
         }
-        final String token = appUserService.signUpUser(
-                new AppUser(
+        final String token = clientService.signUpUser(
+                new Client(
                         UUID.randomUUID(),
                         request.getFirstName(),
                         request.getLastName(),
@@ -60,8 +60,8 @@ public class RegistrationService {
         }
 
         confirmationTokenService.setConfirmedAt(token);
-        appUserService.enableAppUser(
-                confirmationToken.getAppUser().getEmail());
+        clientService.enableAppUser(
+                confirmationToken.getClient().getEmail());
         return "confirmed";
     }
 
