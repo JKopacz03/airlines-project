@@ -1,22 +1,22 @@
 package org.airlines.airlinesproject.appuser;
 
-import org.airlines.airlinesproject.appuser.AppUser;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
+public interface ClientRepository extends JpaRepository<Client, UUID> {
 
-    Optional<AppUser> findByEmail(String email);
+    Optional<Client> findByEmail(String email);
 
     @Transactional
     @Modifying
-    @Query("UPDATE AppUser a " +
+    @Query("UPDATE Client a " +
             "SET a.enabled = TRUE WHERE a.email = ?1")
     int enableAppUser(String email);
 }

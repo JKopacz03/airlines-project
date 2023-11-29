@@ -1,0 +1,22 @@
+server:
+  port: 8040
+
+spring:
+  datasource:
+    username: "postgres"
+    password: "qwerty"
+    url: "jdbc:postgresql://localhost:5432/airlines"
+    driver-class: "org.postgresql.Driver"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  mail:
+    host: localhost
+    port: 1025
+    username: hello
+    password: hello

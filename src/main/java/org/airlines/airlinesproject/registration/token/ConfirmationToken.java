@@ -2,9 +2,9 @@ package org.airlines.airlinesproject.registration.token;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.appuser.AppUser;
+import org.airlines.airlinesproject.appuser.Client;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,17 +28,17 @@ public class ConfirmationToken {
             name = "app_user_id"
 
     )
-    private AppUser appUser;
+    private Client client;
 
     public ConfirmationToken(UUID id,
                              String token,
                              LocalDateTime localDateTimeAt,
                              LocalDateTime expiresAt,
-                             AppUser appUser) {
+                             Client client) {
         this.id = id;
         this.token = token;
         this.localDateTimeAt = localDateTimeAt;
         this.expiresAt = expiresAt;
-        this.appUser = appUser;
+        this.client = client;
     }
 }

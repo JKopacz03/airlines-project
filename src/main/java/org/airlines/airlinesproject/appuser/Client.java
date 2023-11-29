@@ -1,17 +1,19 @@
 package org.airlines.airlinesproject.appuser;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.Cruises;
+import org.airlines.airlinesproject.cruises.Cruises;
+import org.airlines.airlinesproject.transactions.Transactions;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AppUser implements UserDetails {
+public class Client implements UserDetails {
 
     @Id
     private UUID id;
@@ -33,10 +35,12 @@ public class AppUser implements UserDetails {
     private Boolean enabled = false;
     @ManyToMany
     private List<Cruises> accounts;
+    @OneToMany
+    private List<Transactions> transactions;
 
 
 
-    public AppUser(UUID id, String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
+    public Client(UUID id, String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
