@@ -1,4 +1,4 @@
-package org.airlines.airlinesproject.registration;
+package org.airlines.airlinesproject.email;
 
 import org.springframework.stereotype.Service;
 

@@ -6,7 +6,7 @@ import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ public class ClientService implements UserDetailsService {
 
     private final static String USER_NOT_FOUND_MSG = "User with email %s not found";
     private final ClientRepository clientRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
 
     @Override
@@ -38,7 +38,7 @@ public class ClientService implements UserDetailsService {
 
 
 
-        final String encodedPassword = bCryptPasswordEncoder.encode(client.getPassword());
+        final String encodedPassword = passwordEncoder.encode(client.getPassword());
         client.setPassword(encodedPassword);
 
         clientRepository.save(client);

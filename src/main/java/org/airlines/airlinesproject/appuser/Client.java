@@ -35,6 +35,7 @@ public class Client implements UserDetails {
     private Boolean enabled = false;
     @ManyToMany
     private List<Cruises> accounts;
+    @OneToMany
     private List<Transactions> transactions;
 
 

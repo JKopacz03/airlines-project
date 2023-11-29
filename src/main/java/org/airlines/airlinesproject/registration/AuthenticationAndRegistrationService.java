@@ -6,6 +6,7 @@ import org.airlines.airlinesproject.appuser.AppUserRole;
 import org.airlines.airlinesproject.appuser.ClientRepository;
 import org.airlines.airlinesproject.appuser.ClientService;
 import org.airlines.airlinesproject.email.EmailSender;
+import org.airlines.airlinesproject.email.EmailValidator;
 import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationRequest;
 import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationResponse;
 import org.airlines.airlinesproject.registration.token.ConfirmationToken;
@@ -46,7 +47,7 @@ public class AuthenticationAndRegistrationService {
                         AppUserRole.USER
                 )
         );
-        final String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        final String link = "http://localhost:8040/api/v1/registration/confirm?token=" + token;
         emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
         return token;
     }
