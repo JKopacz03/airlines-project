@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.cruises.Cruises;
+import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.transactions.Transactions;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,7 +34,7 @@ public class Client implements UserDetails {
     private Boolean locked = false;
     private Boolean enabled = false;
     @ManyToMany
-    private List<Cruises> accounts;
+    private List<Cruise> accounts;
     @OneToMany
     private List<Transactions> transactions;
 
