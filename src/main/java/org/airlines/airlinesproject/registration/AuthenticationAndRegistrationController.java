@@ -20,12 +20,7 @@ public class AuthenticationAndRegistrationController {
     }
 
     @PostMapping(path = "/authenticate")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody AuthenticationRequest request){
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationAndRegistrationService.authenticate(request));
-    }
-
-    @GetMapping(path = "confirm")
-    public String confirm(@RequestParam("token") String token) {
-        return authenticationAndRegistrationService.confirmToken(token);
     }
 }

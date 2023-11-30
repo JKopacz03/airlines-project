@@ -52,7 +52,7 @@ public class AuthenticationAndRegistrationService {
                 client
         );
 
-        final String link = "http://localhost:8040/api/v1/registration/confirm?token=" + token;
+        final String link = "http://localhost:8040/api/email/confirm?token=" + token;
         emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
 
         final String jwtToken = jwtService.generateToken(client);
