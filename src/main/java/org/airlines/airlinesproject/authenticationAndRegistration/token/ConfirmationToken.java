@@ -1,8 +1,8 @@
-package org.airlines.airlinesproject.registration.token;
+package org.airlines.airlinesproject.authenticationAndRegistration.token;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.appuser.Client;
+import org.airlines.airlinesproject.client.Client;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

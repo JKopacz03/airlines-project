@@ -1,8 +1,14 @@
-package org.airlines.airlinesproject.appuser;
+package org.airlines.airlinesproject.client;
 
 import lombok.RequiredArgsConstructor;
-import org.airlines.airlinesproject.registration.token.ConfirmationToken;
-import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
+import org.airlines.airlinesproject.authenticationAndRegistration.AuthenticationAndRegistrationService;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationRequest;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationResponse;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
+import org.airlines.airlinesproject.client.dto.ClientRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +26,7 @@ public class ClientService implements UserDetailsService {
     private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -27,16 +34,14 @@ public class ClientService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public String signUpUser(Client client){
+    public String signUpUser(Client client) {
         final boolean userExists = clientRepository
                 .findByEmail(client.getEmail())
                 .isPresent();
 
-        if(userExists){
+        if (userExists) {
             throw new IllegalStateException("email already taken");
         }
-
-
 
         final String encodedPassword = passwordEncoder.encode(client.getPassword());
         client.setPassword(encodedPassword);
@@ -45,7 +50,6 @@ public class ClientService implements UserDetailsService {
 
         final String token = UUID.randomUUID().toString();
 
-//        TODO: Send confirmation token
 
         final ConfirmationToken confirmationToken = new ConfirmationToken(
                 UUID.randomUUID(),
@@ -57,12 +61,24 @@ public class ClientService implements UserDetailsService {
 
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
-//        TODO: Send email
-
         return token;
     }
 
     public int enableAppUser(String email) {
         return clientRepository.enableAppUser(email);
+    }
+
+    public void modifyPassword(ClientRequest request){
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getCurrentPassword()
+                )
+        );
+
+        final String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+
+        clientRepository.modifyUserPassword(request.getEmail(), encodedPassword);
     }
 }

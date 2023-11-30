@@ -1,17 +1,17 @@
-package org.airlines.airlinesproject.registration;
+package org.airlines.airlinesproject.authenticationAndRegistration;
 
 import lombok.AllArgsConstructor;
-import org.airlines.airlinesproject.appuser.Client;
-import org.airlines.airlinesproject.appuser.AppUserRole;
-import org.airlines.airlinesproject.appuser.ClientRepository;
-import org.airlines.airlinesproject.appuser.ClientService;
+import org.airlines.airlinesproject.client.Client;
+import org.airlines.airlinesproject.client.AppUserRole;
+import org.airlines.airlinesproject.client.ClientRepository;
+import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.email.EmailSender;
 import org.airlines.airlinesproject.email.EmailValidator;
-import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationRequest;
-import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationResponse;
-import org.airlines.airlinesproject.registration.registration.dto.RegistrationRequest;
-import org.airlines.airlinesproject.registration.token.ConfirmationToken;
-import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationRequest;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationResponse;
+import org.airlines.airlinesproject.authenticationAndRegistration.registration.dto.RegistrationRequest;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.security.config.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

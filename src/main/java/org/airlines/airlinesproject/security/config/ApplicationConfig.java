@@ -1,7 +1,7 @@
 package org.airlines.airlinesproject.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.airlines.airlinesproject.appuser.ClientRepository;
+import org.airlines.airlinesproject.client.ClientRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

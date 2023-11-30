@@ -1,4 +1,4 @@
-package org.airlines.airlinesproject.registration.registration.dto;
+package org.airlines.airlinesproject.authenticationAndRegistration.registration.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

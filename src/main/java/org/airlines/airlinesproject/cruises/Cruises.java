@@ -3,7 +3,7 @@ package org.airlines.airlinesproject.cruises;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.appuser.Client;
+import org.airlines.airlinesproject.client.Client;
 
 
 import java.math.BigDecimal;
