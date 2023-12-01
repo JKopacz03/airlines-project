@@ -6,15 +6,15 @@ import lombok.Data;
 
 import java.util.UUID;
 
-@Entity
-@Data
-//@AllArgsConstructor
-//@NoArgsConstructor
-public class Transactions {
-    @Id
-    private UUID id;
-//    private BigDecimal amount;
-//    private LocalDateTime dateTime;
-//    private
-//    private Client client;
-}
+//@Entity
+//@Data
+////@AllArgsConstructor
+////@NoArgsConstructor
+//public class Transactions {
+//    @Id
+//    private UUID id;
+////    private BigDecimal amount;
+////    private LocalDateTime dateTime;
+////    private
+////    private Client client;
+//}

@@ -45,7 +45,7 @@ public class AuthenticationAndRegistrationService {
                 request.getLastName(),
                 request.getEmail(),
                 request.getPassword(),
-                AppUserRole.USER
+                request.getRole()
         );
 
         final String token = clientService.signUpUser(

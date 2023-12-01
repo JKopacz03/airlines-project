@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
 
 
-import javax.money.CurrencyUnit;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
@@ -26,7 +25,6 @@ public class Cruise {
     private BigDecimal standardPrice;
     private String currency;
     private int numberOfAvailableSeats;
-    private boolean isAvailable = true;
     @ManyToMany
     @JoinTable(
             name = "passengers_of_cruise",

@@ -1,12 +1,9 @@
 package org.airlines.airlinesproject.client;
 
 import lombok.RequiredArgsConstructor;
-import org.airlines.airlinesproject.authenticationAndRegistration.AuthenticationAndRegistrationService;
-import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationRequest;
-import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationResponse;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
-import org.airlines.airlinesproject.client.dto.ClientRequest;
+import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -68,7 +65,7 @@ public class ClientService implements UserDetailsService {
         return clientRepository.enableAppUser(email);
     }
 
-    public void modifyPassword(ClientRequest request){
+    public void modifyPassword(ClientNewPasswordRequest request){
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

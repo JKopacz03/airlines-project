@@ -5,6 +5,7 @@ import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -12,8 +13,6 @@ import java.util.UUID;
 public class CruiseService {
 
     private final CruiseRepository cruiseRepository;
-
-
 
     public void createCruise(CruiseRequest request){
 
@@ -31,5 +30,15 @@ public class CruiseService {
 
         cruiseRepository.save(cruise);
     }
+
+    public void modifyAmountOfAvailableSeats(UUID idOfCruise, int newNumberOfAvailableSeats){
+        Cruise cruise = cruiseRepository.findById(idOfCruise).orElseThrow(
+                () -> new IllegalStateException("can't find user by this id"));
+        cruise.setNumberOfAvailableSeats(newNumberOfAvailableSeats);
+        cruiseRepository.save(cruise);
+    }
+
+
+
 
 }

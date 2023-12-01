@@ -1,15 +1,23 @@
 server:
   port: 8040
 
+paypal:
+  mode: sandbox
+  client:
+    id: AVf2k7X-bT8M4St53DjFxbiLQUx4Zl2w3xgFZiN8gxv4AhkABw7m3F2wiQ4UKEjK3Qq_Jah_fn9_LZoO
+    secret: EL6UBDlVYs76LRL2hEQSgDxOuy6nGrURD60busPx44F-9D-Q6LdR_wsT9jt3p92BOtxRQuxeDy4HWovL
+
 spring:
   datasource:
     username: "postgres"
     password: "qwerty"
-    url: "jdbc:postgresql://localhost:5432/airlines"
+    url: "jdbc:postgresql://localhost:5432/airlines2"
     driver-class: "org.postgresql.Driver"
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      validator:
+        apply-to-ddl: false
+      ddl-auto: create
     show-sql: true
   mail:
     host: localhost
