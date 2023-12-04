@@ -34,10 +34,6 @@ public class Client implements UserDetails {
     private Boolean enabled = false;
     @ManyToMany
     private List<Cruise> cruises;
-//    @OneToMany
-//    private List<Transactions> transactions;
-
-
 
     public Client(UUID id, String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
         this.id = id;
@@ -46,6 +42,14 @@ public class Client implements UserDetails {
         this.email = email;
         this.password = password;
         this.appUserRole = appUserRole;
+    }
+
+    //Constructor to create client only for cruises - Just not sing in
+    public Client(UUID id, String firstName, String lastName, String email) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
     }
 
     @Override

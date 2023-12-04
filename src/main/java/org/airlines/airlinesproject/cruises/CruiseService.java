@@ -14,7 +14,7 @@ public class CruiseService {
 
     private final CruiseRepository cruiseRepository;
 
-    public void createCruise(CruiseRequest request){
+    public Cruise createCruise(CruiseRequest request){
 
         final BigDecimal standardPrice = BigDecimal.valueOf(request.getStandardPrice());
 
@@ -29,6 +29,12 @@ public class CruiseService {
         );
 
         cruiseRepository.save(cruise);
+
+        return cruise;
+    }
+
+    public Cruise findById(UUID id){
+        return cruiseRepository.findById(id).orElseThrow();
     }
 
     public void modifyAmountOfAvailableSeats(UUID idOfCruise, int newNumberOfAvailableSeats){
@@ -37,6 +43,8 @@ public class CruiseService {
         cruise.setNumberOfAvailableSeats(newNumberOfAvailableSeats);
         cruiseRepository.save(cruise);
     }
+
+
 
 
 
