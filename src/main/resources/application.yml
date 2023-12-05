@@ -17,7 +17,7 @@ spring:
     hibernate:
       validator:
         apply-to-ddl: false
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
   mail:
     host: localhost

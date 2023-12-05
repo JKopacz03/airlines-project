@@ -29,19 +29,19 @@ public class Client implements UserDetails {
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
-    private AppUserRole appUserRole;
+    private Role role;
     private Boolean locked = false;
     private Boolean enabled = false;
     @ManyToMany
     private List<Cruise> cruises;
 
-    public Client(UUID id, String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
+    public Client(UUID id, String firstName, String lastName, String email, String password, Role role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.appUserRole = appUserRole;
+        this.role = role;
     }
 
     //Constructor to create client only for cruises - Just not sing in
@@ -55,7 +55,7 @@ public class Client implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority(appUserRole.name());
+                new SimpleGrantedAuthority("ROLE_" + role.name());
         return Collections.singletonList(authority);
     }
 

@@ -2,7 +2,7 @@ package org.airlines.airlinesproject.authenticationAndRegistration;
 
 import lombok.AllArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
-import org.airlines.airlinesproject.client.AppUserRole;
+import org.airlines.airlinesproject.client.Role;
 import org.airlines.airlinesproject.client.ClientRepository;
 import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.email.EmailSender;
@@ -45,7 +45,7 @@ public class AuthenticationAndRegistrationService {
                 request.getLastName(),
                 request.getEmail(),
                 request.getPassword(),
-                request.getRole()
+                Role.valueOf(request.getRole())
         );
 
         final String token = clientService.signUpUser(

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
-import org.airlines.airlinesproject.client.dto.ClientNotSingInRequest;
 import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;

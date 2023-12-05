@@ -33,6 +33,8 @@ public class CruiseService {
         return cruise;
     }
 
+    // TODO: IF SOMEBODY BUY A TICKET NUMBEROFAVAIBLESEATS IS SUBTRACTION
+
     public Cruise findById(UUID id){
         return cruiseRepository.findById(id).orElseThrow();
     }
