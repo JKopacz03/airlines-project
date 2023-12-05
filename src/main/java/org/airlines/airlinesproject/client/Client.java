@@ -1,12 +1,11 @@
-package org.airlines.airlinesproject.appuser;
+package org.airlines.airlinesproject.client;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.airlines.airlinesproject.cruises.Cruises;
-import org.airlines.airlinesproject.transactions.Transactions;
+import org.airlines.airlinesproject.cruises.Cruise;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,29 +29,33 @@ public class Client implements UserDetails {
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
-    private AppUserRole appUserRole;
+    private Role role;
     private Boolean locked = false;
     private Boolean enabled = false;
     @ManyToMany
-    private List<Cruises> accounts;
-    @OneToMany
-    private List<Transactions> transactions;
+    private List<Cruise> cruises;
 
-
-
-    public Client(UUID id, String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
+    public Client(UUID id, String firstName, String lastName, String email, String password, Role role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.appUserRole = appUserRole;
+        this.role = role;
+    }
+
+    //Constructor to create client only for cruises - Just not sing in
+    public Client(UUID id, String firstName, String lastName, String email) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority(appUserRole.name());
+                new SimpleGrantedAuthority("ROLE_" + role.name());
         return Collections.singletonList(authority);
     }
 

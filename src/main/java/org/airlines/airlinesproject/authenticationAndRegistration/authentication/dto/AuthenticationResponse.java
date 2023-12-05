@@ -1,4 +1,4 @@
-package org.airlines.airlinesproject.registration.authentication.dto;
+package org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
-    private String email;
-    private String password;
+public class AuthenticationResponse {
+    private String token;
 }

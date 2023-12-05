@@ -1,16 +1,17 @@
-package org.airlines.airlinesproject.registration;
+package org.airlines.airlinesproject.authenticationAndRegistration;
 
 import lombok.AllArgsConstructor;
-import org.airlines.airlinesproject.appuser.Client;
-import org.airlines.airlinesproject.appuser.AppUserRole;
-import org.airlines.airlinesproject.appuser.ClientRepository;
-import org.airlines.airlinesproject.appuser.ClientService;
+import org.airlines.airlinesproject.client.Client;
+import org.airlines.airlinesproject.client.Role;
+import org.airlines.airlinesproject.client.ClientRepository;
+import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.email.EmailSender;
 import org.airlines.airlinesproject.email.EmailValidator;
-import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationRequest;
-import org.airlines.airlinesproject.registration.authentication.dto.AuthenticationResponse;
-import org.airlines.airlinesproject.registration.token.ConfirmationToken;
-import org.airlines.airlinesproject.registration.token.ConfirmationTokenService;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationRequest;
+import org.airlines.airlinesproject.authenticationAndRegistration.authentication.dto.AuthenticationResponse;
+import org.airlines.airlinesproject.authenticationAndRegistration.registration.dto.RegistrationRequest;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
+import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.security.config.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,24 +33,33 @@ public class AuthenticationAndRegistrationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public String register(RegistrationRequest request) {
+    public AuthenticationResponse register(RegistrationRequest request) {
         final boolean isValidEmail = emailValidator.test(request.getEmail());
         if(!isValidEmail){
             throw new IllegalStateException("email not valid: " + request.getEmail());
         }
-        final String token = clientService.signUpUser(
-                new Client(
-                        UUID.randomUUID(),
-                        request.getFirstName(),
-                        request.getLastName(),
-                        request.getEmail(),
-                        request.getPassword(),
-                        AppUserRole.USER
-                )
+
+        final Client client = new Client(
+                UUID.randomUUID(),
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                request.getPassword(),
+                Role.valueOf(request.getRole())
         );
-        final String link = "http://localhost:8040/api/v1/registration/confirm?token=" + token;
+
+        final String token = clientService.signUpUser(
+                client
+        );
+
+        final String link = "http://localhost:8040/api/email/confirm?token=" + token;
         emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
-        return token;
+
+        final String jwtToken = jwtService.generateToken(client);
+
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request){
