@@ -3,6 +3,7 @@ package org.airlines.airlinesproject.security.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,7 +23,12 @@ public class SecurityConfiguration {
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/**",
             "/api/email/**",
-            "/api/pay/**"
+            "/api/pay/**",
+            "/api/pay",
+            "/api/pay/success?paymentId=**",
+            "/home.html",
+            "/success.html",
+            "/api/pay/cancel/**"
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;

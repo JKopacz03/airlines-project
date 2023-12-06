@@ -8,7 +8,9 @@ import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,14 +25,15 @@ public class PaypalController {
 
     private static ClientPlaceOrderRequest clientPlaceOrderRequest;
 
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/home")
+//    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(path = "/home")
     public String home(){
+//        ModelAndView modelAndView = new ModelAndView();
+//        modelAndView.setViewName("home.html");
+//        return modelAndView;
         return "home";
     }
 
-
-    // TODO: WE MUST GET CRUISE-ID
     @ResponseStatus(HttpStatus.OK)
     @PostMapping
     public String payment(@RequestBody Order order) {
@@ -64,20 +67,23 @@ public class PaypalController {
     }
 
 
-    @GetMapping(value = CANCEL_URL)
+    @GetMapping(path = "/cancel")
     public String cancelPay() {
         return "cancel";
     }
 
-    @GetMapping(value = SUCCESS_URL)
-    public String successPay(@RequestParam("paymentId") String paymentId,
-                             @RequestParam("PayerID") String payerId) {
+//    @GetMapping(value = SUCCESS_URL)
+    @GetMapping(path = "/success")
+    public String successPay(
+            @RequestParam("paymentId") String paymentId,
+            @RequestParam("PayerID") String payerId
+    ) {
         try {
             //Executing payment
             Payment payment = paypalService.executePayment(paymentId, payerId);
 
             //Sing a cruise to client
-            clientService.saveCruiseToClient(clientPlaceOrderRequest);
+//            clientService.saveCruiseToClient(clientPlaceOrderRequest);
 
             System.out.println(payment.toJSON());
             if (payment.getState().equals("approved")) {
