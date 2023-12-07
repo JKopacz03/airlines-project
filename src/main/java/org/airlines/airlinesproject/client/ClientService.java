@@ -118,20 +118,20 @@ public class ClientService implements UserDetailsService {
 
         final Cruise cruise = cruiseService.findById(clientPlaceOrderRequest.getCruiseId());
 
-        if(client.getCruises().isEmpty()){
-            final ArrayList<Cruise> cruises = new ArrayList<>();
-            cruises.add(cruise);
-
-            client.setCruises(cruises);
-            clientRepository.save(client);
-        }
-
         if(!client.getCruises().isEmpty()){
             final List<Cruise> clientCruises = client.getCruises();
             clientCruises.add(cruise);
 
             client.setCruises(clientCruises);
 
+            clientRepository.save(client);
+        }
+
+        if(client.getCruises().isEmpty()){
+            final ArrayList<Cruise> cruises = new ArrayList<>();
+            cruises.add(cruise);
+
+            client.setCruises(cruises);
             clientRepository.save(client);
         }
 

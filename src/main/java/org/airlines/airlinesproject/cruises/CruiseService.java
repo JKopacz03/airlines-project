@@ -100,6 +100,15 @@ public class CruiseService {
                 .email(client.getEmail())
                 .build();
 
+        if(!cruise.getClients().isEmpty()) {
+            final List<Client> cruisesClient = cruise.getClients();
+            cruisesClient.add(clientResponse);
+
+            cruise.setClients(cruisesClient);
+
+            cruiseRepository.save(cruise);
+        }
+
         if(cruise.getClients().isEmpty()){
             final ArrayList<Client> cruisesClient = new ArrayList<>();
             cruisesClient.add(clientResponse);
@@ -109,14 +118,6 @@ public class CruiseService {
             cruiseRepository.save(cruise);
         }
 
-        if(!cruise.getClients().isEmpty()) {
-            final List<Client> cruisesClient = cruise.getClients();
-            cruisesClient.add(clientResponse);
-
-            cruise.setClients(cruisesClient);
-
-            cruiseRepository.save(cruise);
-        }
 
         //Subtraction of available seats
 
