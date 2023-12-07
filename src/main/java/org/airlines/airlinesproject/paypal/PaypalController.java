@@ -22,9 +22,6 @@ public class PaypalController {
     private final PaypalService paypalService;
     private final ClientService clientService;
 
-    public static final String SUCCESS_URL = "api/pay/success";
-
-//    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(path = "/home")
     public String home(){
         return "home";
@@ -35,14 +32,6 @@ public class PaypalController {
     public String payment(@RequestBody Order order) {
 
         try {
-            ClientPlaceOrderRequest orderRequest = new ClientPlaceOrderRequest(
-                    order.getCruiseId(),
-                    order.getFirstName(),
-                    order.getLastName(),
-                    order.getEmail());
-
-
-
             final Payment payment = paypalService.createPayment(
                     order.getPrice(),
                     order.getCurrency(),
@@ -51,10 +40,10 @@ public class PaypalController {
                     order.getDescription(),
                     "http://localhost:8040/api/pay/cancel",
                     "http://localhost:8040/api/pay/success" +
-                            "?cruiseId=" + orderRequest.getCruiseId() +
-                            "&firstName=" + orderRequest.getFirstName() +
-                            "&lastName=" + orderRequest.getLastName() +
-                            "&email=" + orderRequest.getEmail()
+                            "?cruiseId=" + order.getCruiseId() +
+                            "&firstName=" + order.getFirstName() +
+                            "&lastName=" + order.getLastName() +
+                            "&email=" + order.getEmail()
 
             );
             for(Links link: payment.getLinks()){

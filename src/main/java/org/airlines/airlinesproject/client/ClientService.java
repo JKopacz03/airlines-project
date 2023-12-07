@@ -5,9 +5,9 @@ import org.airlines.airlinesproject.authenticationAndRegistration.token.Confirma
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
 import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
+import org.airlines.airlinesproject.client.dto.ClientResponse;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;
-import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,12 +38,14 @@ public class ClientService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public void saveNotSingInClient(String firstName, String lastName, String email) {
+    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
         final Client client = new Client(
                 UUID.randomUUID(),
                 firstName,
                 lastName,
-                email
+                email,
+                user,
+                cruises
         );
 
         clientRepository.save(client);
@@ -98,11 +101,15 @@ public class ClientService implements UserDetailsService {
 
     public void saveCruiseToClient(ClientPlaceOrderRequest clientPlaceOrderRequest) {
 
+        //        Save cruise to client
+
         if(clientRepository.findByEmail(clientPlaceOrderRequest.getEmail()).isEmpty()){
             saveNotSingInClient(
                     clientPlaceOrderRequest.getFirstName(),
                     clientPlaceOrderRequest.getLastName(),
-                    clientPlaceOrderRequest.getEmail()
+                    clientPlaceOrderRequest.getEmail(),
+                    Role.USER,
+                    new ArrayList<Cruise>()
             );
         }
 
@@ -111,17 +118,50 @@ public class ClientService implements UserDetailsService {
 
         final Cruise cruise = cruiseService.findById(clientPlaceOrderRequest.getCruiseId());
 
-        if(!client.getCruises().isEmpty()){
-            client.setCruises(List.of(cruise));
+        if(client.getCruises().isEmpty()){
+            final ArrayList<Cruise> cruises = new ArrayList<>();
+            cruises.add(cruise);
+
+            client.setCruises(cruises);
             clientRepository.save(client);
         }
 
-        final List<Cruise> clientCruises = client.getCruises();
-        clientCruises.add(cruise);
+        if(!client.getCruises().isEmpty()){
+            final List<Cruise> clientCruises = client.getCruises();
+            clientCruises.add(cruise);
 
-        client.setCruises(clientCruises);
+            client.setCruises(clientCruises);
 
-        clientRepository.save(client);
+            clientRepository.save(client);
+        }
 
+        //        Save client to cruise
+
+        cruiseService.saveClientToCruise(clientPlaceOrderRequest.getCruiseId(), client);
+    }
+
+    public List<ClientResponse> findAll(){
+        final List<Client> clients = clientRepository.findAll();
+
+        return clients.stream()
+                .map(this::mapClientToClientResponse)
+                .toList();
+
+    }
+
+    public ClientResponse findByEmail(String email){
+        final Client client = clientRepository.findByEmail(email).orElseThrow();
+
+        return mapClientToClientResponse(client);
+    }
+
+    private ClientResponse mapClientToClientResponse(Client client){
+
+        return ClientResponse.builder()
+                .firstName(client.getFirstName())
+                .lastName(client.getLastName())
+                .email(client.getEmail())
+                .cruises(client.getCruises())
+                .build();
     }
 }

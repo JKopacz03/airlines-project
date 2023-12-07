@@ -1,10 +1,8 @@
 package org.airlines.airlinesproject.client;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -45,6 +43,15 @@ public class Client implements UserDetails {
     }
 
     //Constructor to create client only for cruises - Just not sing in
+    public Client(UUID id, String firstName, String lastName, String email, Role role, List<Cruise> cruises) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.role = role;
+        this.cruises = cruises;
+    }
+
     public Client(UUID id, String firstName, String lastName, String email) {
         this.id = id;
         this.firstName = firstName;

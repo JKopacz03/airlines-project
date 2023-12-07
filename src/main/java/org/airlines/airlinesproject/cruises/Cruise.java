@@ -1,8 +1,11 @@
 package org.airlines.airlinesproject.cruises;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.airlines.airlinesproject.client.Client;
 
 
@@ -15,6 +18,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @Data
+@ToString(exclude = "clients")
 public class Cruise {
 
     @Id
@@ -31,6 +35,7 @@ public class Cruise {
             joinColumns = {@JoinColumn(name = "cruise_id")},
             inverseJoinColumns = {@JoinColumn(name = "client_id")}
     )
+    @JsonIgnore
     private List<Client> clients;
 
     public Cruise(UUID id,
