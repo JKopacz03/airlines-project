@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "api/pay")
@@ -20,17 +22,11 @@ public class PaypalController {
     private final PaypalService paypalService;
     private final ClientService clientService;
 
-    public static final String CANCEL_URL = "api/pay/cancel";
     public static final String SUCCESS_URL = "api/pay/success";
-
-    private static ClientPlaceOrderRequest clientPlaceOrderRequest;
 
 //    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(path = "/home")
     public String home(){
-//        ModelAndView modelAndView = new ModelAndView();
-//        modelAndView.setViewName("home.html");
-//        return modelAndView;
         return "home";
     }
 
@@ -39,14 +35,27 @@ public class PaypalController {
     public String payment(@RequestBody Order order) {
 
         try {
+            ClientPlaceOrderRequest orderRequest = new ClientPlaceOrderRequest(
+                    order.getCruiseId(),
+                    order.getFirstName(),
+                    order.getLastName(),
+                    order.getEmail());
+
+
+
             final Payment payment = paypalService.createPayment(
                     order.getPrice(),
                     order.getCurrency(),
                     order.getMethod(),
                     order.getIntent(),
                     order.getDescription(),
-                    "http://localhost:8040/" + CANCEL_URL,
-                    "http://localhost:8040/" + SUCCESS_URL
+                    "http://localhost:8040/api/pay/cancel",
+                    "http://localhost:8040/api/pay/success" +
+                            "?cruiseId=" + orderRequest.getCruiseId() +
+                            "&firstName=" + orderRequest.getFirstName() +
+                            "&lastName=" + orderRequest.getLastName() +
+                            "&email=" + orderRequest.getEmail()
+
             );
             for(Links link: payment.getLinks()){
                 if(link.getRel().equals("approval_url")){
@@ -57,12 +66,6 @@ public class PaypalController {
             throw new RuntimeException(e);
         }
 
-        clientPlaceOrderRequest = new ClientPlaceOrderRequest(
-                order.getCruiseId(),
-                order.getFirstName(),
-                order.getLastName(),
-                order.getEmail());
-
         return "redirect:/";
     }
 
@@ -72,9 +75,13 @@ public class PaypalController {
         return "cancel";
     }
 
-//    @GetMapping(value = SUCCESS_URL)
+//    TODO: METHOD SHOULD BE POST
     @GetMapping(path = "/success")
     public String successPay(
+            @RequestParam("cruiseId") String cruiseId,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("email") String email,
             @RequestParam("paymentId") String paymentId,
             @RequestParam("PayerID") String payerId
     ) {
@@ -83,7 +90,14 @@ public class PaypalController {
             Payment payment = paypalService.executePayment(paymentId, payerId);
 
             //Sing a cruise to client
-//            clientService.saveCruiseToClient(clientPlaceOrderRequest);
+            clientService.saveCruiseToClient(
+                    ClientPlaceOrderRequest
+                    .builder()
+                            .cruiseId(UUID.fromString(cruiseId))
+                            .firstName(firstName)
+                            .lastName(lastName)
+                            .email(email)
+                    .build());
 
             System.out.println(payment.toJSON());
             if (payment.getState().equals("approved")) {
@@ -95,6 +109,9 @@ public class PaypalController {
 
         return "redirect:/";
     }
+
+
+
 
 
 }
