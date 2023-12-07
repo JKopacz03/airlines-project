@@ -78,18 +78,18 @@ public class PaypalController {
             //Executing payment
             Payment payment = paypalService.executePayment(paymentId, payerId);
 
-            //Sing a cruise to client
-            clientService.saveCruiseToClient(
-                    ClientPlaceOrderRequest
-                    .builder()
-                            .cruiseId(UUID.fromString(cruiseId))
-                            .firstName(firstName)
-                            .lastName(lastName)
-                            .email(email)
-                    .build());
-
             System.out.println(payment.toJSON());
             if (payment.getState().equals("approved")) {
+
+                clientService.saveCruiseToClient(
+                        ClientPlaceOrderRequest
+                                .builder()
+                                .cruiseId(UUID.fromString(cruiseId))
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .email(email)
+                                .build());
+
                 return "success";
             }
         } catch (PayPalRESTException e) {

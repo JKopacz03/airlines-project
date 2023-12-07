@@ -52,6 +52,8 @@ public class PaypalService {
         redirectUrls.setReturnUrl(successUrl);
         payment.setRedirectUrls(redirectUrls);
 
+        apiContext.setMaskRequestId(true);
+
         return payment.create(apiContext);
     }
 
