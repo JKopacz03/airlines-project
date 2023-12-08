@@ -1,5 +1,7 @@
 package org.airlines.airlinesproject.client;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
@@ -8,6 +10,7 @@ import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
 import org.airlines.airlinesproject.client.dto.ClientResponse;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +22,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+
+import static org.apache.logging.log4j.util.StringBuilders.equalsIgnoreCase;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +39,24 @@ public class ClientService implements UserDetailsService {
     private final CruiseService cruiseService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return clientRepository.findByEmail(email)
+        public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+
+        if(Objects.isNull(email)){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(email.isEmpty() || email.isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        final Client client = clientRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
+
+        if(!email.equalsIgnoreCase(client.getEmail())){
+            throw new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email));
+        }
+
+        return client;
     }
 
     public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
