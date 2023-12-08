@@ -646,4 +646,158 @@ public class ClientServiceTest {
                 () -> clientService.singUpUser(null));
     }
 
+    //    Test for saveNotSingInClient method
+
+
+    @Test
+    public void saveNotSingInClient_clientIsExist_throwsIllegalStateException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.of(new Client(UUID.randomUUID(), firstName, lastName, email)));
+
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        lastName,
+                        email,
+                        Role.USER,
+                        null));
+    }
+    @Test
+    public void saveNotSingInClient_firstNameIsNull_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(null,
+                        lastName,
+                        email,
+                        Role.USER,
+                        null));
+    }
+    @Test
+    public void saveNotSingInClient_firstNameIsEmpty_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient("",
+                        lastName,
+                        email,
+                        Role.USER,
+                        null));
+    }
+
+    @Test
+    public void saveNotSingInClient_firstNameIsBlank_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient("  ",
+                        lastName,
+                        email,
+                        Role.USER,
+                        null));
+    }
+
+    @Test
+    public void saveNotSingInClient_lastNameIsNull_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        null,
+                        email,
+                        Role.USER,
+                        null));
+    }
+   @Test
+    public void saveNotSingInClient_lastNameIsEmpty_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        "",
+                        email,
+                        Role.USER,
+                        null));
+    }
+   @Test
+    public void saveNotSingInClient_lastNameIsBlank_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        "   ",
+                        email,
+                        Role.USER,
+                        null));
+    }
+    @Test
+    public void saveNotSingInClient_emailIsNull_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        lastName,
+                        null,
+                        Role.USER,
+                        null));
+    }
+
+    @Test
+    public void saveNotSingInClient_emailIsEmpty_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        lastName,
+                        "",
+                        Role.USER,
+                        null));
+    }
+
+    @Test
+    public void saveNotSingInClient_emailIsBlank_throwsIllegalArgumentException(){
+        //given/when/then
+        String firstName = "Josef";
+        String lastName = "Scott";
+        String email = "example@mail.com";
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveNotSingInClient(firstName,
+                        lastName,
+                        "  ",
+                        Role.USER,
+                        null));
+    }
+
+
+
+
 }

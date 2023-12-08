@@ -72,77 +72,19 @@ public class ClientService implements UserDetailsService {
 
         clientRepository.save(client);
 
-        return saveConfirmationToken(client);
+        return confirmationTokenService.saveConfirmationToken(client);
     }
 
-    private void validateClient(Client client){
-        if(Objects.isNull(client)){
-            throw new IllegalArgumentException("Client can not be null!");
+    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {;
+
+        final boolean userExists = clientRepository
+                .findByEmail(email)
+                .isPresent();
+
+        if (userExists) {
+            throw new IllegalStateException("Email already taken!");
         }
 
-        if(Objects.isNull(client.getId())){
-            throw new IllegalArgumentException("Id can not be null!");
-        }
-
-        if(Objects.isNull(client.getFirstName())){
-            throw new IllegalArgumentException("First name can not be null!");
-        }
-
-        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
-            throw new IllegalArgumentException("First name can not be empty!");
-        }
-
-        if(Objects.isNull(client.getLastName())){
-            throw new IllegalArgumentException("Last name can not be null!");
-        }
-
-        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
-            throw new IllegalArgumentException("Last name can not be empty!");
-        }
-
-        if(Objects.isNull(client.getEmail())){
-            throw new IllegalArgumentException("Email can not be null!");
-        }
-
-        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
-            throw new IllegalArgumentException("Email can not be empty!");
-        }
-
-        if(Objects.isNull(client.getPassword())){
-            throw new IllegalArgumentException("Password can not be null!");
-        }
-
-        if(client.getPassword().isEmpty() || client.getPassword().isBlank()){
-            throw new IllegalArgumentException("Password can not be empty!");
-        }
-
-        if(Objects.isNull(client.getLocked())){
-            throw new IllegalArgumentException("Locked can not be null!");
-        }
-
-        if(Objects.isNull(client.getEnabled())){
-            throw new IllegalArgumentException("Enabled can not be null!");
-        }
-    }
-
-    public String saveConfirmationToken(Client client) {
-        final String token = UUID.randomUUID().toString();
-
-
-        final ConfirmationToken confirmationToken = new ConfirmationToken(
-                UUID.randomUUID(),
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                client
-        );
-
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
-
-        return token;
-    }
-
-    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
         final Client client = new Client(
                 UUID.randomUUID(),
                 firstName,
@@ -151,6 +93,8 @@ public class ClientService implements UserDetailsService {
                 user,
                 cruises
         );
+
+        validateClientWhoNotWillBeSingIn(client);
 
         clientRepository.save(client);
     }
@@ -237,5 +181,90 @@ public class ClientService implements UserDetailsService {
                 .email(client.getEmail())
                 .cruises(client.getCruises())
                 .build();
+    }
+
+
+    private void validateClient(Client client){
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        if(Objects.isNull(client.getPassword())){
+            throw new IllegalArgumentException("Password can not be null!");
+        }
+
+        if(client.getPassword().isEmpty() || client.getPassword().isBlank()){
+            throw new IllegalArgumentException("Password can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLocked())){
+            throw new IllegalArgumentException("Locked can not be null!");
+        }
+
+        if(Objects.isNull(client.getEnabled())){
+            throw new IllegalArgumentException("Enabled can not be null!");
+        }
+    }
+
+    private void validateClientWhoNotWillBeSingIn(Client client){
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
     }
 }
