@@ -48,7 +48,7 @@ public class AuthenticationAndRegistrationService {
                 Role.valueOf(request.getRole())
         );
 
-        final String token = clientService.signUpUser(
+        final String token = clientService.singUpUser(
                 client
         );
 

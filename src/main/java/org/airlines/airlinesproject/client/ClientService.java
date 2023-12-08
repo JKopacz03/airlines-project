@@ -1,7 +1,5 @@
 package org.airlines.airlinesproject.client;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
@@ -24,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import static org.apache.logging.log4j.util.StringBuilders.equalsIgnoreCase;
 
 @Service
 @RequiredArgsConstructor
@@ -59,26 +55,16 @@ public class ClientService implements UserDetailsService {
         return client;
     }
 
-    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
-        final Client client = new Client(
-                UUID.randomUUID(),
-                firstName,
-                lastName,
-                email,
-                user,
-                cruises
-        );
+    public String singUpUser(@NonNull Client client) {
 
-        clientRepository.save(client);
-    }
+        validateClient(client);
 
-    public String signUpUser(Client client) {
         final boolean userExists = clientRepository
                 .findByEmail(client.getEmail())
                 .isPresent();
 
         if (userExists) {
-            throw new IllegalStateException("email already taken");
+            throw new IllegalStateException("Email already taken!");
         }
 
         final String encodedPassword = passwordEncoder.encode(client.getPassword());
@@ -86,6 +72,60 @@ public class ClientService implements UserDetailsService {
 
         clientRepository.save(client);
 
+        return saveConfirmationToken(client);
+    }
+
+    private void validateClient(Client client){
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        if(Objects.isNull(client.getPassword())){
+            throw new IllegalArgumentException("Password can not be null!");
+        }
+
+        if(client.getPassword().isEmpty() || client.getPassword().isBlank()){
+            throw new IllegalArgumentException("Password can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLocked())){
+            throw new IllegalArgumentException("Locked can not be null!");
+        }
+
+        if(Objects.isNull(client.getEnabled())){
+            throw new IllegalArgumentException("Enabled can not be null!");
+        }
+    }
+
+    public String saveConfirmationToken(Client client) {
         final String token = UUID.randomUUID().toString();
 
 
@@ -100,6 +140,19 @@ public class ClientService implements UserDetailsService {
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         return token;
+    }
+
+    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
+        final Client client = new Client(
+                UUID.randomUUID(),
+                firstName,
+                lastName,
+                email,
+                user,
+                cruises
+        );
+
+        clientRepository.save(client);
     }
 
     public int enableAppUser(String email) {
