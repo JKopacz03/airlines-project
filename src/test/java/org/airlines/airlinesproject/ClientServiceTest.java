@@ -797,7 +797,71 @@ public class ClientServiceTest {
                         null));
     }
 
+    //    Test for enableAppUser method
 
+    @Test
+    public void enableAppUser_enablingUppUser_enabledUppUser(){
+        //given
+        String email = "example@mail.com";
+        //when
+        clientRepository.enableAppUser(email);
+        //then
+        verify(clientRepository).enableAppUser(email);
+    }
 
+    @Test
+    public void enableAppUser_userIsAlreadyEnabled_throwsIllegalStateException(){
+        //given
+        String email = "example@mail.com";
+        when(clientRepository.findByEmail(email)).thenReturn(
+                Optional.of(new Client(
+                        UUID.randomUUID(),
+                        "Josef",
+                        "Scott",
+                        email,
+                        "password",
+                        Role.USER,
+                        false,
+                        true,
+                        null
+                )));
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clientService.enableAppUser(email));
+    }
+
+    @Test
+    public void enableAppUser_notExistingClient_throwsIllegalStateException(){
+        //given
+        String email = "example@mail.com";
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clientService.enableAppUser(email));
+    }
+
+    @Test
+    public void enableAppUser_nullEmail_throwsIllegalStateException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.enableAppUser(null));
+    }
+    @Test
+    public void enableAppUser_emailIsEmpty_throwsIllegalStateException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.enableAppUser(""));
+    }
+
+    @Test
+    public void enableAppUser_emailIsBlank_throwsIllegalStateException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.enableAppUser("   "));
+    }
 
 }

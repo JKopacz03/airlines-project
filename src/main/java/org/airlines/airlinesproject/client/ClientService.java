@@ -18,10 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +34,7 @@ public class ClientService implements UserDetailsService {
     @Override
         public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
 
-        if(Objects.isNull(email)){
-            throw new IllegalArgumentException("Email can not be null!");
-        }
-
-        if(email.isEmpty() || email.isBlank()){
-            throw new IllegalArgumentException("Email can not be empty!");
-        }
+        emailValidation(email);
 
         final Client client = clientRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
@@ -100,10 +91,29 @@ public class ClientService implements UserDetailsService {
     }
 
     public int enableAppUser(String email) {
+
+        emailValidation(email);
+
+        final Optional<Client> client = clientRepository
+                .findByEmail(email);
+
+        final boolean userExists = client
+                .isPresent();
+
+        if (!userExists) {
+            throw new IllegalStateException("User doesn't exist!");
+        }
+
+        if(client.orElseThrow().getEnabled()){
+            throw new IllegalStateException("User is already enabled!");
+        }
+
         return clientRepository.enableAppUser(email);
     }
 
     public void modifyPassword(ClientNewPasswordRequest request){
+
+
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -209,13 +219,7 @@ public class ClientService implements UserDetailsService {
             throw new IllegalArgumentException("Last name can not be empty!");
         }
 
-        if(Objects.isNull(client.getEmail())){
-            throw new IllegalArgumentException("Email can not be null!");
-        }
-
-        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
-            throw new IllegalArgumentException("Email can not be empty!");
-        }
+        emailValidation(client.getEmail());
 
         if(Objects.isNull(client.getPassword())){
             throw new IllegalArgumentException("Password can not be null!");
@@ -259,11 +263,15 @@ public class ClientService implements UserDetailsService {
             throw new IllegalArgumentException("Last name can not be empty!");
         }
 
-        if(Objects.isNull(client.getEmail())){
+        emailValidation(client.getEmail());
+    }
+
+    private static void emailValidation(String email) {
+        if(Objects.isNull(email)){
             throw new IllegalArgumentException("Email can not be null!");
         }
 
-        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
+        if(email.isEmpty() || email.isBlank()){
             throw new IllegalArgumentException("Email can not be empty!");
         }
     }
