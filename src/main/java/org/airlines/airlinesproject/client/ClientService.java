@@ -8,6 +8,7 @@ import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
 import org.airlines.airlinesproject.client.dto.ClientResponse;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +32,50 @@ public class ClientService implements UserDetailsService {
     private final CruiseService cruiseService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return clientRepository.findByEmail(email)
+        public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+
+        emailValidation(email);
+
+        final Client client = clientRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
+
+        if(!email.equalsIgnoreCase(client.getEmail())){
+            throw new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email));
+        }
+
+        return client;
     }
 
-    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {
+    public String singUpUser(@NonNull Client client) {
+
+        validateClient(client);
+
+        final boolean userExists = clientRepository
+                .findByEmail(client.getEmail())
+                .isPresent();
+
+        if (userExists) {
+            throw new IllegalStateException("Email already taken!");
+        }
+
+        final String encodedPassword = passwordEncoder.encode(client.getPassword());
+        client.setPassword(encodedPassword);
+
+        clientRepository.save(client);
+
+        return confirmationTokenService.saveConfirmationToken(client);
+    }
+
+    public void saveNotSingInClient(String firstName, String lastName, String email, Role user, ArrayList<Cruise> cruises) {;
+
+        final boolean userExists = clientRepository
+                .findByEmail(email)
+                .isPresent();
+
+        if (userExists) {
+            throw new IllegalStateException("Email already taken!");
+        }
+
         final Client client = new Client(
                 UUID.randomUUID(),
                 firstName,
@@ -48,44 +85,35 @@ public class ClientService implements UserDetailsService {
                 cruises
         );
 
-        clientRepository.save(client);
-    }
-
-    public String signUpUser(Client client) {
-        final boolean userExists = clientRepository
-                .findByEmail(client.getEmail())
-                .isPresent();
-
-        if (userExists) {
-            throw new IllegalStateException("email already taken");
-        }
-
-        final String encodedPassword = passwordEncoder.encode(client.getPassword());
-        client.setPassword(encodedPassword);
+        validateClientWhoNotWillBeSingIn(client);
 
         clientRepository.save(client);
-
-        final String token = UUID.randomUUID().toString();
-
-
-        final ConfirmationToken confirmationToken = new ConfirmationToken(
-                UUID.randomUUID(),
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                client
-        );
-
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
-
-        return token;
     }
 
     public int enableAppUser(String email) {
+
+        emailValidation(email);
+
+        final Optional<Client> client = clientRepository
+                .findByEmail(email);
+
+        final boolean userExists = client
+                .isPresent();
+
+        if (!userExists) {
+            throw new IllegalStateException("User doesn't exist!");
+        }
+
+        if(client.orElseThrow().getEnabled()){
+            throw new IllegalStateException("User is already enabled!");
+        }
+
         return clientRepository.enableAppUser(email);
     }
 
-    public void modifyPassword(ClientNewPasswordRequest request){
+    public void modifyPassword(@NonNull ClientNewPasswordRequest request){
+
+        validateClientNewPasswordRequest(request);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -99,7 +127,9 @@ public class ClientService implements UserDetailsService {
         clientRepository.modifyUserPassword(request.getEmail(), encodedPassword);
     }
 
-    public void saveCruiseToClient(ClientPlaceOrderRequest clientPlaceOrderRequest) {
+    public void saveCruiseToClient(@NonNull ClientPlaceOrderRequest clientPlaceOrderRequest) {
+
+        clientPlaceOrderRequestValidation(clientPlaceOrderRequest);
 
         //        Save cruise to client
 
@@ -114,7 +144,7 @@ public class ClientService implements UserDetailsService {
         }
 
         final Client client = clientRepository.findByEmail(clientPlaceOrderRequest.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("Client doesn't exist"));
 
         final Cruise cruise = cruiseService.findById(clientPlaceOrderRequest.getCruiseId());
 
@@ -141,7 +171,12 @@ public class ClientService implements UserDetailsService {
     }
 
     public List<ClientResponse> findAll(){
+
         final List<Client> clients = clientRepository.findAll();
+
+        if(clients.isEmpty()){
+            throw new IllegalArgumentException("List od clients is empty");
+        }
 
         return clients.stream()
                 .map(this::mapClientToClientResponse)
@@ -149,13 +184,20 @@ public class ClientService implements UserDetailsService {
 
     }
 
-    public ClientResponse findByEmail(String email){
-        final Client client = clientRepository.findByEmail(email).orElseThrow();
+    public ClientResponse findByEmail(@NonNull String email){
+
+        emailValidation(email);
+
+        final Client client = clientRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Client doesn't exist"));
+
+        if(!email.equalsIgnoreCase(client.getEmail())){
+            throw new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email));
+        }
 
         return mapClientToClientResponse(client);
     }
 
-    private ClientResponse mapClientToClientResponse(Client client){
+    public ClientResponse mapClientToClientResponse(Client client){
 
         return ClientResponse.builder()
                 .firstName(client.getFirstName())
@@ -163,5 +205,151 @@ public class ClientService implements UserDetailsService {
                 .email(client.getEmail())
                 .cruises(client.getCruises())
                 .build();
+    }
+
+
+    private void validateClient(Client client){
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        emailValidation(client.getEmail());
+
+        if(Objects.isNull(client.getPassword())){
+            throw new IllegalArgumentException("Password can not be null!");
+        }
+
+        if(client.getPassword().isEmpty() || client.getPassword().isBlank()){
+            throw new IllegalArgumentException("Password can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLocked())){
+            throw new IllegalArgumentException("Locked can not be null!");
+        }
+
+        if(Objects.isNull(client.getEnabled())){
+            throw new IllegalArgumentException("Enabled can not be null!");
+        }
+    }
+
+    private void validateClientWhoNotWillBeSingIn(Client client){
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        emailValidation(client.getEmail());
+    }
+
+    private static void emailValidation(String email) {
+        if(Objects.isNull(email)){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(email.isEmpty() || email.isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+    }
+
+    private void validateClientNewPasswordRequest(ClientNewPasswordRequest request) {
+        if(Objects.isNull(request)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(request.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(request.getEmail().isEmpty() || request.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        if(Objects.isNull(request.getCurrentPassword())){
+            throw new IllegalArgumentException("Current password can not be null!");
+        }
+
+        if(request.getCurrentPassword().isEmpty() || request.getCurrentPassword().isBlank()){
+            throw new IllegalArgumentException("Current password can not be empty!");
+        }
+
+        if(Objects.isNull(request.getNewPassword())){
+            throw new IllegalArgumentException("New password can not be null!");
+        }
+
+        if(request.getNewPassword().isEmpty() || request.getNewPassword().isBlank()){
+            throw new IllegalArgumentException("New password can not be empty!");
+        }
+
+        if(clientRepository.findByEmail(request.getEmail()).isEmpty()){
+            throw new IllegalStateException("Client with email: " + request.getEmail() + " doesn't exist");
+        }
+    }
+
+    private static void clientPlaceOrderRequestValidation(ClientPlaceOrderRequest clientPlaceOrderRequest) {
+        if(Objects.isNull(clientPlaceOrderRequest)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(clientPlaceOrderRequest.getCruiseId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+
+        if(Objects.isNull(clientPlaceOrderRequest.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(clientPlaceOrderRequest.getFirstName().isEmpty() || clientPlaceOrderRequest.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(clientPlaceOrderRequest.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(clientPlaceOrderRequest.getLastName().isEmpty() || clientPlaceOrderRequest.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        emailValidation(clientPlaceOrderRequest.getEmail());
     }
 }
