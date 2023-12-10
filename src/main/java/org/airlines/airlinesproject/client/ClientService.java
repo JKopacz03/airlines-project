@@ -171,7 +171,12 @@ public class ClientService implements UserDetailsService {
     }
 
     public List<ClientResponse> findAll(){
+
         final List<Client> clients = clientRepository.findAll();
+
+        if(clients.isEmpty()){
+            throw new IllegalArgumentException("List od clients is empty");
+        }
 
         return clients.stream()
                 .map(this::mapClientToClientResponse)
@@ -185,7 +190,7 @@ public class ClientService implements UserDetailsService {
         return mapClientToClientResponse(client);
     }
 
-    private ClientResponse mapClientToClientResponse(Client client){
+    public ClientResponse mapClientToClientResponse(Client client){
 
         return ClientResponse.builder()
                 .firstName(client.getFirstName())

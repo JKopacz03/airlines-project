@@ -7,6 +7,7 @@ import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.client.Role;
 import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
 import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
+import org.airlines.airlinesproject.client.dto.ClientResponse;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;
 import org.junit.jupiter.api.Assertions;
@@ -1282,6 +1283,57 @@ public class ClientServiceTest {
                 () -> clientService.saveCruiseToClient(request));
     }
 
+//    Tests for findAll method
+
+    @Test
+    public void findAll_findingAll_foundedAll(){
+        //given
+
+        final Client josef = new Client(
+                UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                "password",
+                Role.USER,
+                false,
+                true,
+                null
+        );
+
+        final Client brett = new Client(
+                UUID.randomUUID(),
+                "Brett",
+                "Scott",
+                "example2@mail.com",
+                "password",
+                Role.USER,
+                false,
+                true,
+                null
+        );
+
+        final ArrayList<Client> clients = new ArrayList<>();
+        clients.add(josef);
+        clients.add(brett);
+
+        when(clientRepository.findAll()).thenReturn(clients);
+        //when
+        final List<ClientResponse> clientResponseList = clientService.findAll();
+        //then
+        final List<ClientResponse> expectedClientResponseList = clients.stream()
+                .map(client -> clientService.mapClientToClientResponse(client))
+                .toList();
+        Assertions.assertEquals(clientResponseList, expectedClientResponseList);
+    }
+
+    @Test
+    public void findAll_emptyListOfClients_throwsIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.findAll());
+    }
 
 
 }
