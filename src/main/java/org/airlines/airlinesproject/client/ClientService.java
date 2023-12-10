@@ -127,7 +127,7 @@ public class ClientService implements UserDetailsService {
         clientRepository.modifyUserPassword(request.getEmail(), encodedPassword);
     }
 
-    public void saveCruiseToClient(ClientPlaceOrderRequest clientPlaceOrderRequest) {
+    public void saveCruiseToClient(@NonNull ClientPlaceOrderRequest clientPlaceOrderRequest) {
 
         clientPlaceOrderRequestValidation(clientPlaceOrderRequest);
 
@@ -184,8 +184,15 @@ public class ClientService implements UserDetailsService {
 
     }
 
-    public ClientResponse findByEmail(String email){
-        final Client client = clientRepository.findByEmail(email).orElseThrow();
+    public ClientResponse findByEmail(@NonNull String email){
+
+        emailValidation(email);
+
+        final Client client = clientRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Client doesn't exist"));
+
+        if(!email.equalsIgnoreCase(client.getEmail())){
+            throw new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email));
+        }
 
         return mapClientToClientResponse(client);
     }

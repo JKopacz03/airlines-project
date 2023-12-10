@@ -1335,5 +1335,90 @@ public class ClientServiceTest {
                 () -> clientService.findAll());
     }
 
+//    Tests for findByEmail
+@Test
+public void findByEmail_returnClient_clientReturned(){
+    //given
+    String email = "example@mail.com";
+
+    final Client client = new Client(UUID.randomUUID(),
+            "Josef",
+            "Scott",
+            email,
+            "password",
+            Role.USER,
+            false,
+            true,
+            Collections.singletonList(new Cruise(UUID.randomUUID(),
+                    "Warsaw",
+                    "Tokyo",
+                    new GregorianCalendar(2023, Calendar.DECEMBER, 25, 12, 30).getTime(),
+                    BigDecimal.valueOf(10000),
+                    "PLN",
+                    30)));
+
+    final ClientResponse expectedClientResponse = clientService.mapClientToClientResponse(client);
+
+    when(clientRepository.findByEmail(email)).thenReturn(Optional.of(client));
+    //when
+    final ClientResponse actualClientResponse = clientService.findByEmail(email);
+    //then
+    Assertions.assertEquals(expectedClientResponse, actualClientResponse);
+}
+
+    @Test
+    public void findByEmail_randomCase_clientReturned(){
+        // given
+        String email = "exAmplE@mail.com";
+
+        final Client client = new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                email,
+                "password",
+                Role.USER,
+                false,
+                true,
+                Collections.singletonList(new Cruise(UUID.randomUUID(),
+                        "Warsaw",
+                        "Tokyo",
+                        new GregorianCalendar(2023, Calendar.DECEMBER, 25, 12, 30).getTime(),
+                        BigDecimal.valueOf(10000),
+                        "PLN",
+                        30)));
+
+        final ClientResponse expectedClientResponse = clientService.mapClientToClientResponse(client);
+
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.of(client));
+        //when
+        final ClientResponse actualClientResponse = clientService.findByEmail(email);
+        //then
+        Assertions.assertEquals(expectedClientResponse, actualClientResponse);
+    }
+
+    @Test
+    public void findByEmail_notFoundEmail_throwsUsernameNotFoundException(){
+        //given/when/then
+        Assertions.assertThrows(
+                UsernameNotFoundException.class,
+                () -> clientService.findByEmail("example@mail.com"));
+    }
+
+    @Test
+    public void findByEmail_nullEmail_throwsIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.findByEmail(null));
+    }
+
+    @Test
+    public void findByEmail_emptyEmail_throwsIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.findByEmail(""));
+    }
+
 
 }
