@@ -113,37 +113,7 @@ public class ClientService implements UserDetailsService {
 
     public void modifyPassword(@NonNull ClientNewPasswordRequest request){
 
-        if(Objects.isNull(request)){
-            throw new IllegalArgumentException("Request can not be null!");
-        }
-
-        if(Objects.isNull(request.getEmail())){
-            throw new IllegalArgumentException("Email can not be null!");
-        }
-
-        if(request.getEmail().isEmpty() || request.getEmail().isBlank()){
-            throw new IllegalArgumentException("Email can not be empty!");
-        }
-
-        if(Objects.isNull(request.getCurrentPassword())){
-            throw new IllegalArgumentException("Current password can not be null!");
-        }
-
-        if(request.getCurrentPassword().isEmpty() || request.getCurrentPassword().isBlank()){
-            throw new IllegalArgumentException("Current password can not be empty!");
-        }
-
-        if(Objects.isNull(request.getNewPassword())){
-            throw new IllegalArgumentException("New password can not be null!");
-        }
-
-        if(request.getNewPassword().isEmpty() || request.getNewPassword().isBlank()){
-            throw new IllegalArgumentException("New password can not be empty!");
-        }
-
-        if(clientRepository.findByEmail(request.getEmail()).isEmpty()){
-            throw new IllegalStateException("Client with email: " + request.getEmail() + " doesn't exist");
-        }
+        validateClientNewPasswordRequest(request);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -158,6 +128,8 @@ public class ClientService implements UserDetailsService {
     }
 
     public void saveCruiseToClient(ClientPlaceOrderRequest clientPlaceOrderRequest) {
+
+        clientPlaceOrderRequestValidation(clientPlaceOrderRequest);
 
         //        Save cruise to client
 
@@ -304,5 +276,68 @@ public class ClientService implements UserDetailsService {
         if(email.isEmpty() || email.isBlank()){
             throw new IllegalArgumentException("Email can not be empty!");
         }
+    }
+
+    private void validateClientNewPasswordRequest(ClientNewPasswordRequest request) {
+        if(Objects.isNull(request)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(request.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(request.getEmail().isEmpty() || request.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        if(Objects.isNull(request.getCurrentPassword())){
+            throw new IllegalArgumentException("Current password can not be null!");
+        }
+
+        if(request.getCurrentPassword().isEmpty() || request.getCurrentPassword().isBlank()){
+            throw new IllegalArgumentException("Current password can not be empty!");
+        }
+
+        if(Objects.isNull(request.getNewPassword())){
+            throw new IllegalArgumentException("New password can not be null!");
+        }
+
+        if(request.getNewPassword().isEmpty() || request.getNewPassword().isBlank()){
+            throw new IllegalArgumentException("New password can not be empty!");
+        }
+
+        if(clientRepository.findByEmail(request.getEmail()).isEmpty()){
+            throw new IllegalStateException("Client with email: " + request.getEmail() + " doesn't exist");
+        }
+    }
+
+    private static void clientPlaceOrderRequestValidation(ClientPlaceOrderRequest clientPlaceOrderRequest) {
+        if(Objects.isNull(clientPlaceOrderRequest)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(clientPlaceOrderRequest.getCruiseId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+
+        if(Objects.isNull(clientPlaceOrderRequest.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(clientPlaceOrderRequest.getFirstName().isEmpty() || clientPlaceOrderRequest.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(clientPlaceOrderRequest.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(clientPlaceOrderRequest.getLastName().isEmpty() || clientPlaceOrderRequest.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        emailValidation(clientPlaceOrderRequest.getEmail());
     }
 }

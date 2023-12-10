@@ -1003,7 +1003,7 @@ public class ClientServiceTest {
     }
 
     @Test
-    public void modifyPassword_blankNewPassword_throwsIllegalArgumentException(){
+    public void modifyPassword_blankNewPassword_throwsIllegalArgumentException() {
         //given
         final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
                 "example@mail.com", "password", "   ");
@@ -1011,15 +1011,277 @@ public class ClientServiceTest {
         Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> clientService.modifyPassword(request));
-    }@Test
-    public void saveCruiseToClient_savingCruiseToClient_CruiseSaved(){
-        //given
-        new ClientPlaceOrderRequest();
-        //when
-
-        //then
     }
 
 //    Tests for saveCruiseToClient
+    @Test
+    public void saveCruiseToClient_savingCruiseToClientWithNoCruises_CruiseSaved(){
+        //given
+        final UUID clientId = UUID.fromString("0d4ff2e2-95c5-11ee-b9d1-0242ac120002");
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "Scott",
+                "example@mail.com");
+
+        when(clientRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(new Client(
+                clientId,
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                Role.USER,
+                new ArrayList<>()
+        )));
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2023, Calendar.DECEMBER, 25, 12, 30).getTime(),
+                BigDecimal.valueOf(10000),
+                "PLN",
+                30
+        );
+
+        final ArrayList<Cruise> cruises = new ArrayList<>();
+        cruises.add(cruise);
+
+        final Client expectedClient = new Client(
+                clientId,
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                Role.USER,
+                cruises
+        );
+
+        when(cruiseService.findById(cruiseId)).thenReturn(cruise);
+        //when
+        clientService.saveCruiseToClient(request);
+        //then
+        verify(clientRepository).save(expectedClient);
+    }
+
+    @Test
+    public void saveCruiseToClient_savingCruiseToClientWithCruises_CruiseSaved(){
+        //given
+        final UUID clientId = UUID.fromString("0d4ff2e2-95c5-11ee-b9d1-0242ac120002");
+        final UUID firstCruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final UUID secondCruiseId = UUID.fromString("007a32fe-9759-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                secondCruiseId,
+                "Josef",
+                "Scott",
+                "example@mail.com");
+
+        final Cruise cruise = new Cruise(
+                firstCruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2023, Calendar.DECEMBER, 25, 12, 30).getTime(),
+                BigDecimal.valueOf(10000),
+                "PLN",
+                30
+        );
+
+        final Cruise newCruise = new Cruise(
+                secondCruiseId,
+                "San Francisco",
+                "New York",
+                new GregorianCalendar(2023, Calendar.DECEMBER, 22, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "USD",
+                25
+        );
+
+        final ArrayList<Cruise> cruises = new ArrayList<>();
+        cruises.add(cruise);
+
+        when(clientRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(new Client(
+                clientId,
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                Role.USER,
+                cruises
+        )));
+
+        final ArrayList<Cruise> newCruises = new ArrayList<>();
+        newCruises.add(cruise);
+        newCruises.add(newCruise);
+
+        final Client expectedClient = new Client(
+                clientId,
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                Role.USER,
+                newCruises
+        );
+
+        when(cruiseService.findById(secondCruiseId)).thenReturn(newCruise);
+        //when
+        clientService.saveCruiseToClient(request);
+        //then
+        verify(clientRepository).save(expectedClient);
+    }
+
+    @Test
+    public void saveCruiseToClient_requestNull_throwsIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(null));
+    }
+
+    @Test
+    public void saveCruiseToClient_idNull_throwsIllegalArgumentException(){
+        //given
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                null,
+                "Josef",
+                "Scott",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+    @Test
+    public void saveCruiseToClient_nullFirstName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                null,
+                "Scott",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+    @Test
+    public void saveCruiseToClient_emptyFirstName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "",
+                "Scott",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_blankFirstName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "   ",
+                "Scott",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_nullLastName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                null,
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_emptyLastName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_blankLastName_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "   ",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_nullEmail_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "Scott",
+                null);
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_emptyEmail_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "Scott",
+                "");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+    @Test
+    public void saveCruiseToClient_blankEmail_throwsIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final ClientPlaceOrderRequest request = new ClientPlaceOrderRequest(
+                cruiseId,
+                "Josef",
+                "Scott",
+                "example@mail.com");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.saveCruiseToClient(request));
+    }
+
+
 
 }
