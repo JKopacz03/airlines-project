@@ -5,6 +5,8 @@ import org.airlines.airlinesproject.client.Client;
 import org.airlines.airlinesproject.client.ClientRepository;
 import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.client.Role;
+import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
+import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseService;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -863,5 +866,160 @@ public class ClientServiceTest {
                 IllegalArgumentException.class,
                 () -> clientService.enableAppUser("   "));
     }
+
+//    test for modifyPassword
+
+    @Test
+    public void modifyPassword_modifyPassword_passwordModified(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "password", "newPassword");
+
+        final String encodedPassword = "$2a$12$4VNgNTGHhGSyOKWILEcsouh1WvJLavJPXWtzecPjKOeoAjzi8v7w6";
+        when(clientRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(new Client(
+                UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com",
+                "password",
+                Role.USER
+        )));
+        when(passwordEncoder.encode(request.getNewPassword())).thenReturn(encodedPassword);
+        //when
+        clientService.modifyPassword(request);
+        //then
+        verify(clientRepository).modifyUserPassword(request.getEmail(), encodedPassword);
+    }
+
+    @Test
+    public void modifyPassword_notExistingEmail_throwsIllegalStateException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "password", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> clientService.modifyPassword(request));
+
+    }
+
+    @Test
+    public void modifyPassword_nullRequest_throwsIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(null));
+
+    }
+
+    @Test
+    public void modifyPassword_nullEmail_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                null, "password", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+
+    }
+
+    @Test
+    public void modifyPassword_emptyEmail_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "", "password", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+
+    }
+
+    @Test
+    public void modifyPassword_blankEmail_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "", "password", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_nullCurrentPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", null, "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_emptyCurrentPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_blankCurrentPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "    ", "newPassword");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_nullNewPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "password", null);
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_emptyNewPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "password", "");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }
+
+    @Test
+    public void modifyPassword_blankNewPassword_throwsIllegalArgumentException(){
+        //given
+        final ClientNewPasswordRequest request = new ClientNewPasswordRequest(
+                "example@mail.com", "password", "   ");
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> clientService.modifyPassword(request));
+    }@Test
+    public void saveCruiseToClient_savingCruiseToClient_CruiseSaved(){
+        //given
+        new ClientPlaceOrderRequest();
+        //when
+
+        //then
+    }
+
+//    Tests for saveCruiseToClient
 
 }

@@ -111,9 +111,39 @@ public class ClientService implements UserDetailsService {
         return clientRepository.enableAppUser(email);
     }
 
-    public void modifyPassword(ClientNewPasswordRequest request){
+    public void modifyPassword(@NonNull ClientNewPasswordRequest request){
 
+        if(Objects.isNull(request)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
 
+        if(Objects.isNull(request.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(request.getEmail().isEmpty() || request.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
+
+        if(Objects.isNull(request.getCurrentPassword())){
+            throw new IllegalArgumentException("Current password can not be null!");
+        }
+
+        if(request.getCurrentPassword().isEmpty() || request.getCurrentPassword().isBlank()){
+            throw new IllegalArgumentException("Current password can not be empty!");
+        }
+
+        if(Objects.isNull(request.getNewPassword())){
+            throw new IllegalArgumentException("New password can not be null!");
+        }
+
+        if(request.getNewPassword().isEmpty() || request.getNewPassword().isBlank()){
+            throw new IllegalArgumentException("New password can not be empty!");
+        }
+
+        if(clientRepository.findByEmail(request.getEmail()).isEmpty()){
+            throw new IllegalStateException("Client with email: " + request.getEmail() + " doesn't exist");
+        }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -142,7 +172,7 @@ public class ClientService implements UserDetailsService {
         }
 
         final Client client = clientRepository.findByEmail(clientPlaceOrderRequest.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("Client doesn't exist"));
 
         final Cruise cruise = cruiseService.findById(clientPlaceOrderRequest.getCruiseId());
 
