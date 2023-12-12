@@ -1,6 +1,7 @@
 package org.airlines.airlinesproject;
 
 import org.airlines.airlinesproject.client.Client;
+import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseRepository;
 import org.airlines.airlinesproject.cruises.CruiseService;
@@ -14,8 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class CruiseServiceTest {
@@ -412,6 +412,128 @@ public class CruiseServiceTest {
                 () -> cruiseService.findAllForAdmin()
         );
     }
+
+//    Tests for saveClientToCruise
+
+    @Test
+    public void saveClientToCruise_savingClientToCruise_clientSavedToCruise(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        final Client client = new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com"
+        );
+        when(cruiseRepository.findById(cruiseId)).thenReturn(Optional.of(cruise));
+        //when
+        cruiseService.saveClientToCruise(cruiseId, client);
+        //then
+        final Cruise expectedCruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                29
+        );
+        final ArrayList<Client> clients = new ArrayList<>();
+        clients.add(client);
+        expectedCruise.setClients(clients);
+        verify(cruiseRepository, atMostOnce()).save(expectedCruise);
+    }
+
+    @Test
+    public void saveClientToCruise_savingClientToCruiseWithExistingListOfClients_clientSavedToCruise(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        final Client josef = new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com"
+        );
+        final Client mathew = new Client(UUID.randomUUID(),
+                "Mathew",
+                "Scott",
+                "example2@mail.com"
+        );
+        final ArrayList<Client> alreadyClients = new ArrayList<>();
+        alreadyClients.add(mathew);
+        cruise.setClients(alreadyClients);
+        when(cruiseRepository.findById(cruiseId)).thenReturn(Optional.of(cruise));
+        //when
+        cruiseService.saveClientToCruise(cruiseId, josef);
+        //then
+        final Cruise expectedCruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                29
+        );
+        final ArrayList<Client> clients = new ArrayList<>();
+        clients.add(mathew);
+        clients.add(josef);
+        expectedCruise.setClients(clients);
+        verify(cruiseRepository, atMostOnce()).save(expectedCruise);
+    }
+
+    @Test
+    public void saveClientToCruise_notExistingCruise_throwIllegalStateException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Client client = new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com"
+        );
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> cruiseService.saveClientToCruise(cruiseId, client)
+        );
+    }
+
+    @Test
+    public void saveClientToCruise_nullCruiseId_throwIllegalArgumentException(){
+        //given
+        final Client client = new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com"
+        );
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> cruiseService.saveClientToCruise(null, client)
+        );
+    }
+
+
+
 
 
 }

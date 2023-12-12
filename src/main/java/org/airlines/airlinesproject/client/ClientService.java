@@ -1,7 +1,6 @@
 package org.airlines.airlinesproject.client;
 
 import lombok.RequiredArgsConstructor;
-import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationToken;
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.client.dto.ClientNewPasswordRequest;
 import org.airlines.airlinesproject.client.dto.ClientPlaceOrderRequest;
@@ -17,7 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -85,7 +83,7 @@ public class ClientService implements UserDetailsService {
                 cruises
         );
 
-        validateClientWhoNotWillBeSingIn(client);
+        validateClientResponse(client);
 
         clientRepository.save(client);
     }
@@ -208,7 +206,7 @@ public class ClientService implements UserDetailsService {
     }
 
 
-    private void validateClient(Client client){
+    public void validateClient(Client client){
         if(Objects.isNull(client)){
             throw new IllegalArgumentException("Client can not be null!");
         }
@@ -252,7 +250,7 @@ public class ClientService implements UserDetailsService {
         }
     }
 
-    private void validateClientWhoNotWillBeSingIn(Client client){
+    public void validateClientResponse(Client client){
         if(Objects.isNull(client)){
             throw new IllegalArgumentException("Client can not be null!");
         }

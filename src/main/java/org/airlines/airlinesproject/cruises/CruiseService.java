@@ -2,6 +2,7 @@ package org.airlines.airlinesproject.cruises;
 
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
+import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.airlines.airlinesproject.cruises.dto.CruiseResponse;
 import org.springframework.lang.NonNull;
@@ -101,9 +102,11 @@ public class CruiseService {
                 .numberOfAvailableSeats(cruise.getNumberOfAvailableSeats())
                 .build();
     }
-    public void saveClientToCruise(UUID cruiseId, Client client){
+    public void saveClientToCruise(@NonNull UUID cruiseId, @NonNull Client client){
 
-        final Cruise cruise = cruiseRepository.findById(cruiseId).orElseThrow();
+        validateSaveClientToCruise(cruiseId, client);
+
+        final Cruise cruise = cruiseRepository.findById(cruiseId).orElseThrow(() -> new IllegalStateException("Cruise doesn't exist"));
 
         final Client clientResponse = Client.builder()
                 .id(client.getId())
@@ -112,7 +115,7 @@ public class CruiseService {
                 .email(client.getEmail())
                 .build();
 
-        if(!cruise.getClients().isEmpty()) {
+        if(!Objects.isNull(cruise.getClients()) && !cruise.getClients().isEmpty()) {
             final List<Client> cruisesClient = cruise.getClients();
             cruisesClient.add(clientResponse);
 
@@ -121,7 +124,7 @@ public class CruiseService {
             cruiseRepository.save(cruise);
         }
 
-        if(cruise.getClients().isEmpty()){
+        if(Objects.isNull(cruise.getClients()) || cruise.getClients().isEmpty()){
             final ArrayList<Client> cruisesClient = new ArrayList<>();
             cruisesClient.add(clientResponse);
 
@@ -134,6 +137,44 @@ public class CruiseService {
         //Subtraction of available seats
 
         modifyAmountOfAvailableSets(cruise);
+    }
+
+    private static void validateSaveClientToCruise(UUID cruiseId, Client client) {
+        if(Objects.isNull(cruiseId)){
+            throw new IllegalArgumentException("Cruise id can not be null!");
+        }
+
+        if(Objects.isNull(client)){
+            throw new IllegalArgumentException("Client can not be null!");
+        }
+
+        if(Objects.isNull(client.getId())){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        if(Objects.isNull(client.getFirstName())){
+            throw new IllegalArgumentException("First name can not be null!");
+        }
+
+        if(client.getFirstName().isEmpty() || client.getFirstName().isBlank()){
+            throw new IllegalArgumentException("First name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getLastName())){
+            throw new IllegalArgumentException("Last name can not be null!");
+        }
+
+        if(client.getLastName().isEmpty() || client.getLastName().isBlank()){
+            throw new IllegalArgumentException("Last name can not be empty!");
+        }
+
+        if(Objects.isNull(client.getEmail())){
+            throw new IllegalArgumentException("Email can not be null!");
+        }
+
+        if(client.getEmail().isEmpty() || client.getEmail().isBlank()){
+            throw new IllegalArgumentException("Email can not be empty!");
+        }
     }
 
     public void modifyAmountOfAvailableSets(Cruise cruise) {
