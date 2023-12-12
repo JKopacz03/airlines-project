@@ -373,5 +373,45 @@ public class CruiseServiceTest {
         );
     }
 
+//    Tests for findAll
+
+    @Test
+    public void findByAll_findingAllCruises_allCruisesFounded(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        final ArrayList<Cruise> cruises = new ArrayList<>();
+        cruises.add(cruise);
+
+        when(cruiseRepository.findAll()).thenReturn(cruises);
+        //when
+        final List<CruiseResponse> actualCruises = cruiseService.findAll();
+        //then
+        final List<CruiseResponse> expectedCruises = cruises.stream()
+                .map(cruise1 -> cruiseService.mapCruiseToCruiseResponse(cruise1))
+                .toList();
+
+        Assertions.assertEquals(expectedCruises, actualCruises);
+    }
+
+    @Test
+    public void findByAll_notExistingCruises_throwIllegalStateException(){
+        //given
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> cruiseService.findAllForAdmin()
+        );
+    }
+
 
 }
