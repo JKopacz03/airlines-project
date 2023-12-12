@@ -40,8 +40,11 @@ public class CruiseService {
         return cruise;
     }
 
-    public Cruise findById(UUID id){
-        return cruiseRepository.findById(id).orElseThrow();
+    public Cruise findById(@NonNull UUID id){
+        if(Objects.isNull(id)){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+        return cruiseRepository.findById(id).orElseThrow(() -> new IllegalStateException("Cruise with id: " + id + " doesn't exist"));
     }
 
     public void modifyAmountOfAvailableSeats(UUID idOfCruise, int newNumberOfAvailableSeats){
