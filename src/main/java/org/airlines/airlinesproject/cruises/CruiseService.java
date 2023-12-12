@@ -1,6 +1,5 @@
 package org.airlines.airlinesproject.cruises;
 
-import com.paypal.api.payments.Currency;
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
@@ -47,15 +46,11 @@ public class CruiseService {
         return cruiseRepository.findById(id).orElseThrow(() -> new IllegalStateException("Cruise with id: " + id + " doesn't exist"));
     }
 
-    public void modifyAmountOfAvailableSeats(UUID idOfCruise, int newNumberOfAvailableSeats){
-        Cruise cruise = cruiseRepository.findById(idOfCruise).orElseThrow(
-                () -> new IllegalStateException("can't find user by this id"));
-        cruise.setNumberOfAvailableSeats(newNumberOfAvailableSeats);
-        cruiseRepository.save(cruise);
-    }
-
     public List<CruiseResponse> findAllForAdmin(){
         final List<Cruise> cruises = cruiseRepository.findAll();
+        if(cruises.isEmpty()){
+            throw new IllegalStateException("Not existing cruises");
+        }
 
         return cruises.stream()
                 .map(this::mapCruiseToCruiseResponseForAdmin)
@@ -64,13 +59,16 @@ public class CruiseService {
 
     public List<CruiseResponse> findAll(){
         final List<Cruise> cruises = cruiseRepository.findAll();
+        if(cruises.isEmpty()){
+            throw new IllegalStateException("Not existing cruises");
+        }
 
         return cruises.stream()
                 .map(this::mapCruiseToCruiseResponse)
                 .toList();
     }
 
-    private CruiseResponse mapCruiseToCruiseResponseForAdmin(Cruise cruise){
+    public CruiseResponse mapCruiseToCruiseResponseForAdmin(Cruise cruise){
         final List<Client> clients = cruise.getClients();
 
         return CruiseResponse.builder()
@@ -81,11 +79,18 @@ public class CruiseService {
                 .standardPrice(cruise.getStandardPrice().doubleValue())
                 .currency(cruise.getCurrency().getCurrencyCode())
                 .numberOfAvailableSeats(cruise.getNumberOfAvailableSeats())
-                .clients(clients.stream().map(Client::getEmail).toList())
+                .clients(getClients(clients))
                 .build();
     }
 
-    private CruiseResponse mapCruiseToCruiseResponse(Cruise cruise){
+    private static List<String> getClients(List<Client> clients) {
+        if(Objects.isNull(clients)){
+            return null;
+        }
+        return clients.stream().map(Client::getEmail).toList();
+    }
+
+    public CruiseResponse mapCruiseToCruiseResponse(Cruise cruise){
         return CruiseResponse.builder()
                 .Id(cruise.getId().toString())
                 .cruiseFrom(cruise.getCruiseFrom())
@@ -128,6 +133,10 @@ public class CruiseService {
 
         //Subtraction of available seats
 
+        modifyAmountOfAvailableSets(cruise);
+    }
+
+    public void modifyAmountOfAvailableSets(Cruise cruise) {
         final int numberOfAvailableSeats = cruise.getNumberOfAvailableSeats();
 
         cruise.setNumberOfAvailableSeats(numberOfAvailableSeats - 1);

@@ -1,19 +1,18 @@
 package org.airlines.airlinesproject;
 
+import org.airlines.airlinesproject.client.Client;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseRepository;
 import org.airlines.airlinesproject.cruises.CruiseService;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
+import org.airlines.airlinesproject.cruises.dto.CruiseResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -300,5 +299,79 @@ public class CruiseServiceTest {
                 IllegalArgumentException.class,
                 () -> cruiseService.findById(null));
     }
+
+//    Tests for findAllForAdmin
+
+    @Test
+    public void findByAllForAdmin_findingAllCruises_allCruisesFounded(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        cruise.setClients(List.of(new Client(UUID.randomUUID(),
+                "Josef",
+                "Scott",
+                "example@mail.com"
+                )));
+        final ArrayList<Cruise> cruises = new ArrayList<>();
+        cruises.add(cruise);
+
+        when(cruiseRepository.findAll()).thenReturn(cruises);
+        //when
+        final List<CruiseResponse> actualCruises = cruiseService.findAllForAdmin();
+        //then
+        final List<CruiseResponse> expectedCruises = cruises.stream()
+                .map(cruise1 -> cruiseService.mapCruiseToCruiseResponseForAdmin(cruise1))
+                .toList();
+
+        Assertions.assertEquals(expectedCruises, actualCruises);
+    }
+
+    @Test
+    public void findByAllForAdmin_findingAllCruisesButListOfClientsIsNull_allCruisesFounded(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        final ArrayList<Cruise> cruises = new ArrayList<>();
+        cruises.add(cruise);
+
+        when(cruiseRepository.findAll()).thenReturn(cruises);
+        //when
+        final List<CruiseResponse> actualCruises = cruiseService.findAllForAdmin();
+        //then
+        final List<CruiseResponse> expectedCruises = cruises.stream()
+                .map(cruise1 -> cruiseService.mapCruiseToCruiseResponseForAdmin(cruise1))
+                .toList();
+
+        Assertions.assertEquals(expectedCruises, actualCruises);
+    }
+
+    @Test
+    public void findByAllForAdmin_notExistingCruises_throwIllegalStateException(){
+        //given
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> cruiseService.findAllForAdmin()
+        );
+    }
+
 
 }
