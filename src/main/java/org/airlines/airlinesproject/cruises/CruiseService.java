@@ -1,15 +1,17 @@
 package org.airlines.airlinesproject.cruises;
 
+import com.paypal.api.payments.Currency;
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.airlines.airlinesproject.cruises.dto.CruiseResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +19,9 @@ public class CruiseService {
 
     private final CruiseRepository cruiseRepository;
 
-    public Cruise createCruise(CruiseRequest request){
+    public Cruise createCruise(@NonNull CruiseRequest request){
+
+        CruiseRequestValidation(request);
 
         final BigDecimal standardPrice = BigDecimal.valueOf(request.getStandardPrice());
 
@@ -77,6 +81,7 @@ public class CruiseService {
                 .clients(clients.stream().map(Client::getEmail).toList())
                 .build();
     }
+
     private CruiseResponse mapCruiseToCruiseResponse(Cruise cruise){
         return CruiseResponse.builder()
                 .Id(cruise.getId().toString())
@@ -88,7 +93,6 @@ public class CruiseService {
                 .numberOfAvailableSeats(cruise.getNumberOfAvailableSeats())
                 .build();
     }
-
     public void saveClientToCruise(UUID cruiseId, Client client){
 
         final Cruise cruise = cruiseRepository.findById(cruiseId).orElseThrow();
@@ -126,6 +130,61 @@ public class CruiseService {
         cruise.setNumberOfAvailableSeats(numberOfAvailableSeats - 1);
 
         cruiseRepository.save(cruise);
+    }
+
+    private static void CruiseRequestValidation(CruiseRequest request) {
+        if(Objects.isNull(request)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(request.getCruiseFrom())){
+            throw new IllegalArgumentException("Cruise from can not be null!");
+        }
+
+        if(request.getCruiseFrom().isEmpty() || request.getCruiseFrom().isBlank()){
+            throw new IllegalArgumentException("Cruise from can not be empty!");
+        }
+
+        if(Objects.isNull(request.getCruiseTo())){
+            throw new IllegalArgumentException("Cruise to can not be null!");
+        }
+
+        if(request.getCruiseTo().isEmpty() || request.getCruiseTo().isBlank()){
+            throw new IllegalArgumentException("Cruise to can not be empty!");
+        }
+
+        if(Objects.isNull(request.getDateOfStartCruise())){
+            throw new IllegalArgumentException("Date of the start cruise can not be null!");
+        }
+
+        if(Objects.isNull(request.getCurrency())){
+            throw new IllegalArgumentException("Currency can not be null!");
+        }
+
+        if(request.getCurrency().isEmpty() || request.getCurrency().isBlank()){
+            throw new IllegalArgumentException("Cruise to can not be empty!");
+        }
+
+        if(request.getStandardPrice() < 1){
+            throw new IllegalArgumentException("Standard price must be higher then 0!");
+        }
+
+        if(request.getNumberOfAvailableSeats() < 0){
+            throw new IllegalArgumentException("Number of available seats must be higher or equal 0!");
+        }
+
+        final Date requestDate = request.getDateOfStartCruise();
+
+        final LocalDateTime requestLocalDateTime = requestDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+        final LocalDateTime localDateTime = LocalDateTime.now();
+
+        final int comparedDate = requestLocalDateTime.compareTo(localDateTime);
+
+        if(comparedDate < 0){
+            throw new IllegalArgumentException(requestLocalDateTime + " is older then current time: " + localDateTime);
+        }
     }
 
 
