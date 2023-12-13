@@ -1,4 +1,4 @@
-package org.airlines.airlinesproject;
+package org.airlines.airlinesproject.junit_testing_services;
 
 import org.airlines.airlinesproject.client.Client;
 import org.airlines.airlinesproject.cruises.Cruise;
@@ -16,7 +16,6 @@ import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class CruiseServiceTest {
 
     private CruiseRepository cruiseRepository;

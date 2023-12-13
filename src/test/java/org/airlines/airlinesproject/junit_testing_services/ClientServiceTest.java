@@ -1,4 +1,4 @@
-package org.airlines.airlinesproject;
+package org.airlines.airlinesproject.junit_testing_services;
 
 import org.airlines.airlinesproject.authenticationAndRegistration.token.ConfirmationTokenService;
 import org.airlines.airlinesproject.client.Client;
@@ -25,7 +25,6 @@ import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class ClientServiceTest {
 
     private ClientService clientService;

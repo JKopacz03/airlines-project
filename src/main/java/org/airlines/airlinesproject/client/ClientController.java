@@ -21,6 +21,7 @@ public class ClientController {
         clientService.modifyPassword(request);
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/find-all-clients")
     @PreAuthorize("hasRole('ADMIN')")
     public List<ClientResponse> findAllClients(){
