@@ -1,7 +1,6 @@
 package org.airlines.airlinesproject;
 
 import org.airlines.airlinesproject.client.Client;
-import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.cruises.Cruise;
 import org.airlines.airlinesproject.cruises.CruiseRepository;
 import org.airlines.airlinesproject.cruises.CruiseService;
@@ -532,8 +531,77 @@ public class CruiseServiceTest {
         );
     }
 
+//    Tests for modifyAmountOdAvailableSeats
 
+    @Test
+    public void modifyAmountOfAvailableSeats_modifyingAmount_AmountModified(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
 
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                30
+        );
+        when(cruiseRepository.findById(cruiseId)).thenReturn(Optional.of(cruise));
+        //when
+        cruiseService.modifyAmountOfAvailableSeats(cruise.getId());
+        // then
+        final Cruise expectedCruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                29
+        );
+        verify(cruiseRepository).save(expectedCruise);
+    }
 
+    @Test
+    public void modifyAmountOfAvailableSeats_notExistingCruise_throwIllegalStateException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        //when/then
+        Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> cruiseService.modifyAmountOfAvailableSeats(cruiseId)
+        );
+    }
+
+    @Test
+    public void modifyAmountOfAvailableSeats_notAvailableSeats_throwIllegalArgumentException(){
+        //given
+        final UUID cruiseId = UUID.fromString("58075c12-95c5-11ee-b9d1-0242ac120002");
+        final Cruise cruise = new Cruise(
+                cruiseId,
+                "Warsaw",
+                "Tokyo",
+                new GregorianCalendar(2123, Calendar.DECEMBER, 10, 12, 30).getTime(),
+                BigDecimal.valueOf(1000),
+                "PLN",
+                0
+        );
+        when(cruiseRepository.findById(cruiseId)).thenReturn(Optional.of(cruise));
+        //when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> cruiseService.modifyAmountOfAvailableSeats(cruiseId)
+        );
+    }
+
+    @Test
+    public void modifyAmountOfAvailableSeats_nullId_throwIllegalArgumentException(){
+        //given/when/then
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> cruiseService.modifyAmountOfAvailableSeats(null)
+        );
+    }
 
 }

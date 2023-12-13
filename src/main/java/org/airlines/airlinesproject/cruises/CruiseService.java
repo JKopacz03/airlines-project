@@ -2,7 +2,6 @@ package org.airlines.airlinesproject.cruises;
 
 import lombok.RequiredArgsConstructor;
 import org.airlines.airlinesproject.client.Client;
-import org.airlines.airlinesproject.client.ClientService;
 import org.airlines.airlinesproject.cruises.dto.CruiseRequest;
 import org.airlines.airlinesproject.cruises.dto.CruiseResponse;
 import org.springframework.lang.NonNull;
@@ -136,7 +135,7 @@ public class CruiseService {
 
         //Subtraction of available seats
 
-        modifyAmountOfAvailableSets(cruise);
+        modifyAmountOfAvailableSeats(cruise.getId());
     }
 
     private static void validateSaveClientToCruise(UUID cruiseId, Client client) {
@@ -177,7 +176,22 @@ public class CruiseService {
         }
     }
 
-    public void modifyAmountOfAvailableSets(Cruise cruise) {
+    public void modifyAmountOfAvailableSeats(@NonNull UUID cruiseId) {
+
+        if(Objects.isNull(cruiseId)){
+            throw new IllegalArgumentException("Id can not be null!");
+        }
+
+        final Cruise cruise = findById(cruiseId);
+
+        if(Objects.isNull(cruise)){
+            throw new IllegalStateException("Cruise doesn't exist");
+        }
+
+        if(cruise.getNumberOfAvailableSeats() == 0){
+            throw new IllegalArgumentException("Not available seats");
+        }
+
         final int numberOfAvailableSeats = cruise.getNumberOfAvailableSeats();
 
         cruise.setNumberOfAvailableSeats(numberOfAvailableSeats - 1);
@@ -227,6 +241,61 @@ public class CruiseService {
         }
 
         final Date requestDate = request.getDateOfStartCruise();
+
+        final LocalDateTime requestLocalDateTime = requestDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+        final LocalDateTime localDateTime = LocalDateTime.now();
+
+        final int comparedDate = requestLocalDateTime.compareTo(localDateTime);
+
+        if(comparedDate < 0){
+            throw new IllegalArgumentException(requestLocalDateTime + " is older then current time: " + localDateTime);
+        }
+    }
+
+    private static void cruiseValidation(Cruise cruise) {
+        if(Objects.isNull(cruise.getId())){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(cruise)){
+            throw new IllegalArgumentException("Request can not be null!");
+        }
+
+        if(Objects.isNull(cruise.getCruiseFrom())){
+            throw new IllegalArgumentException("Cruise from can not be null!");
+        }
+
+        if(cruise.getCruiseFrom().isEmpty() || cruise.getCruiseFrom().isBlank()){
+            throw new IllegalArgumentException("Cruise from can not be empty!");
+        }
+
+        if(Objects.isNull(cruise.getCruiseTo())){
+            throw new IllegalArgumentException("Cruise to can not be null!");
+        }
+
+        if(cruise.getCruiseTo().isEmpty() || cruise.getCruiseTo().isBlank()){
+            throw new IllegalArgumentException("Cruise to can not be empty!");
+        }
+
+        if(Objects.isNull(cruise.getDateOfStartCruise())){
+            throw new IllegalArgumentException("Date of the start cruise can not be null!");
+        }
+
+        if(Objects.isNull(cruise.getCurrency())){
+            throw new IllegalArgumentException("Currency can not be null!");
+        }
+
+        if(cruise.getStandardPrice().doubleValue() < 1){
+            throw new IllegalArgumentException("Standard price must be higher then 0!");
+        }
+
+        if(cruise.getNumberOfAvailableSeats() < 0){
+            throw new IllegalArgumentException("Number of available seats must be higher or equal 0!");
+        }
+
+        final Date requestDate = cruise.getDateOfStartCruise();
 
         final LocalDateTime requestLocalDateTime = requestDate.toInstant()
                 .atZone(ZoneId.systemDefault())
